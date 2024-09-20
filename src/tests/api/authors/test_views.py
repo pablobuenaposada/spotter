@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from django.shortcuts import resolve_url
 from model_bakery import baker
@@ -50,19 +52,19 @@ class TestsAuthorViewCreate:
     def test_url(self):
         assert self.endpoint() == "/api/authors/"
 
-    def test_success(self, client):
+    def test_success(self, authenticated_client):
         assert Author.objects.exists() is False
 
         data = {"name": "Santiago Segura"}
-        response = client.post(self.endpoint(), data)
+        response = authenticated_client.post(self.endpoint(), data)
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data == AuthorSerializer(Author.objects.get()).data
 
-    def test_invalid_data(self, client):
+    def test_invalid_data(self, authenticated_client):
         """Wrong payload should return 400 status code"""
         data = {}
-        response = client.post(self.endpoint(), data)
+        response = authenticated_client.post(self.endpoint(), data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -79,10 +81,12 @@ class TestsAuthorViewUpdate:
     def test_url(self):
         assert self.endpoint(self.author.pk) == f"/api/authors/{self.author.pk}/"
 
-    def test_success(self, client):
+    def test_success(self, authenticated_client):
         data = {"name": "foo"}
-        response = client.put(
-            self.endpoint(self.author.pk), data, content_type="application/json"
+        response = authenticated_client.put(
+            self.endpoint(self.author.pk),
+            json.dumps(data),
+            content_type="application/json",
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -104,17 +108,17 @@ class TestsAuthorViewDelete:
     def test_url(self):
         assert self.endpoint(self.author.pk) == f"/api/authors/{self.author.pk}/"
 
-    def test_success(self, client):
+    def test_success(self, authenticated_client):
         assert Author.objects.filter(id=self.author.pk).exists() is True
 
-        response = client.delete(self.endpoint(self.author.pk))
+        response = authenticated_client.delete(self.endpoint(self.author.pk))
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert Author.objects.exists() is False
 
-    def test_not_found(self, client):
+    def test_not_found(self, authenticated_client):
         """Trying to delete an author that doesn't exist"""
         invalid_id = self.author.pk + 1
-        response = client.delete(self.endpoint(invalid_id))
+        response = authenticated_client.delete(self.endpoint(invalid_id))
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
