@@ -3,7 +3,6 @@ name: Build
 on:
   push:
   pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -13,6 +12,12 @@ jobs:
     - name: Build docker image
       run: |
         make docker/build
+    - name: Forgotten migrations
+      run: |
+        make docker/migrations/check
     - name: Lint
       run: |
         make docker/format/check
+    - name: Unit tests
+      run: |
+        make docker/tests
