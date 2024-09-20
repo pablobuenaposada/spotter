@@ -21,7 +21,11 @@ docker/build:
 	docker build --no-cache	--tag=$(DOCKER_IMAGE) .
 
 docker/tests:
-	 docker run $(DOCKER_IMAGE) make tests
+	 docker compose up -d --force-recreate
+	 docker exec $(DOCKER_IMAGE)-django-1 make tests
+
+docker/run:
+	docker compose -f docker-compose.yml up --force-recreate -d --build
 
 docker/format/check:
 	 docker run $(DOCKER_IMAGE) /bin/sh -c 'make format/check'
@@ -30,4 +34,4 @@ docker/migrations/check:
 	 docker run $(DOCKER_IMAGE) /bin/sh -c 'make migrations/check'
 
 tests: venv-dev
-	DJANGO_SETTINGS_MODULE=main.settings PYTHONPATH=src poetry run pytest src/tests
+	poetry run pytest src/tests
