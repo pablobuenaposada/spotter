@@ -31,7 +31,7 @@ docker/format/check:
 	 docker run $(DOCKER_IMAGE) /bin/sh -c 'make format/check'
 
 docker/migrations/check:
-	 docker run $(DOCKER_IMAGE) /bin/sh -c 'make migrations/check'
+	 docker run --env-file .env.local $(DOCKER_IMAGE) /bin/sh -c 'make migrations/check'
 
 tests: venv-dev
 	poetry run pytest src/tests
