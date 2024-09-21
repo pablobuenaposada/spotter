@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from django.core import management
 from django.shortcuts import resolve_url
 from model_bakery import baker
 from rest_framework import status
@@ -123,3 +124,70 @@ class TestsBookViewDelete:
         response = authenticated_client.delete(self.endpoint(invalid_id))
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestsBookSearchView:
+    @pytest.fixture(autouse=True)
+    def setup_class(self):
+        self.book1 = baker.make(
+            Book, title="foo", author=baker.make(Author, name="Jhon")
+        )
+        self.book2 = baker.make(
+            Book, title="bar", author=baker.make(Author, name="Monica")
+        )
+        self.book3 = baker.make(
+            Book, title="banana", author=baker.make(Author, name="Ryan")
+        )
+
+    def endpoint(self):
+        return resolve_url("api:books-search")
+
+    def test_url(self):
+        assert self.endpoint() == "/api/books/search"
+
+    def test_success(self, client):
+        # clean elasticsearch indexes
+        management.call_command("search_index", "--delete", "-f")
+        management.call_command("search_index", "--rebuild", "-f")
+
+        # match by title
+        response = client.get(self.endpoint(), data={"q": "foo"})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == [
+            {
+                "id": self.book1.id,
+                "title": self.book1.title,
+                "author": {"id": self.book1.author.id, "name": self.book1.author.name},
+            }
+        ]
+
+        # match by author
+        response = client.get(self.endpoint(), data={"q": "monica"})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == [
+            {
+                "id": self.book2.id,
+                "title": self.book2.title,
+                "author": {"id": self.book2.author.id, "name": self.book2.author.name},
+            }
+        ]
+
+        # match by title and author
+        response = client.get(self.endpoint(), data={"q": "foo monica"})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == [
+            {
+                "id": self.book1.id,
+                "title": self.book1.title,
+                "author": {"id": self.book1.author.id, "name": self.book1.author.name},
+            },
+            {
+                "id": self.book2.id,
+                "title": self.book2.title,
+                "author": {"id": self.book2.author.id, "name": self.book2.author.name},
+            },
+        ]

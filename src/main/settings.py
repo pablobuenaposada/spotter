@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_extensions",
     "rest_framework.authtoken",
+    "django_elasticsearch_dsl",
     "library",
 ]
 
@@ -64,6 +65,10 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
+}
+
+ELASTICSEARCH_DSL = {
+    "default": {"hosts": env("ELASTICSEARCH_DSL_HOST")},
 }
 
 ROOT_URLCONF = "main.urls"
