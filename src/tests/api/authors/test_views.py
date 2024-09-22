@@ -41,7 +41,9 @@ class TestsAuthorViewList:
         response = client.get(self.endpoint())
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == [AuthorSerializer(author).data for author in authors]
+        assert response.data["results"] == [
+            AuthorSerializer(author).data for author in authors
+        ]
 
 
 @pytest.mark.django_db

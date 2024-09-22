@@ -42,7 +42,7 @@ class TestsBookViewList:
         response = client.get(self.endpoint())
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == [BookSerializer(book).data for book in books]
+        assert response.data["results"] == [BookSerializer(book).data for book in books]
 
 
 @pytest.mark.django_db

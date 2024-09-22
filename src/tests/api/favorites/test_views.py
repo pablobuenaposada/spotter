@@ -23,4 +23,4 @@ class TestsFavoriteDetailView:
         response = authenticated_client.get(self.endpoint())
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == [FavoriteSerializer(favorite).data]
+        assert response.data["results"] == [FavoriteSerializer(favorite).data]
