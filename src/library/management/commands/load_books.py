@@ -2,7 +2,7 @@ import json
 import time
 
 from django.core.management.base import BaseCommand
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 
 from library.models import Author, Book, Genre
 
@@ -52,6 +52,12 @@ class Command(BaseCommand):
                             book.genres.add(genre)
 
                 count += 1
+
+        # reset the primary key sequence
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT setval('library_book_id_seq', (SELECT MAX(id) FROM library_book));"
+            )
 
         end_time = time.time()
         elapsed_time = end_time - start_time
