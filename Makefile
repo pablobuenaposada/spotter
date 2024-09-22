@@ -33,5 +33,8 @@ docker/format/check:
 docker/migrations/check:
 	 docker run --env-file .env.local $(DOCKER_IMAGE) /bin/sh -c 'make migrations/check'
 
+docker/loader:
+	docker exec -it $(DOCKER_IMAGE)-django-1 python src/manage.py load_books
+
 tests: venv-dev
 	poetry run pytest src/tests

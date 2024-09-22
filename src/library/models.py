@@ -10,9 +10,15 @@ class Author(TimeStampedModel):
         super().save(**kwargs)
 
 
+class Genre(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+
 class Book(TimeStampedModel):
     title = models.CharField(max_length=200, null=False, blank=False, default=None)
     author = models.ForeignKey(Author, related_name="books", on_delete=models.CASCADE)
+    average_rating = models.FloatField()
+    genres = models.ManyToManyField(Genre)
 
     class Meta:
         constraints = [

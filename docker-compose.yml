@@ -17,6 +17,8 @@ services:
     command: python src/manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
+    volumes:
+      - ./loader:/app/loader
     env_file:
       - .env.local
     depends_on:
@@ -52,3 +54,4 @@ services:
 
 volumes:
   postgres_data:
+  loader:

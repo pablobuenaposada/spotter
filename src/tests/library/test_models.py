@@ -44,6 +44,10 @@ class TestBook:
             "modified": book.modified,
             "title": book.title,
             "author": book.author,
+            "average_rating": book.average_rating,
         }
-        for field in {field.name for field in Book._meta.get_fields()}:
+        for field in {field.name for field in Book._meta.get_fields()} - {
+            "genres",
+            "favorite",
+        }:
             assert getattr(book, field) == expected[field]

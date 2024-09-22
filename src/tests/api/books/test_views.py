@@ -7,7 +7,7 @@ from model_bakery import baker
 from rest_framework import status
 
 from api.books.serializers import BookSerializer
-from library.models import Author, Book
+from library.models import Author, Book, Genre
 
 
 @pytest.mark.django_db
@@ -57,7 +57,12 @@ class TestsBookViewCreate:
         assert Book.objects.exists() is False
 
         author = baker.make(Author)
-        data = {"title": "Never ending story", "author": author.id}
+        data = {
+            "title": "Never ending story",
+            "author": author.id,
+            "average_rating": 0,
+            "genres": [baker.make(Genre).id],
+        }
         response = authenticated_client.post(self.endpoint(), data)
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -84,7 +89,12 @@ class TestsBookViewUpdate:
         assert self.endpoint(self.book.pk) == f"/api/books/{self.book.pk}/"
 
     def test_success(self, authenticated_client):
-        data = {"title": "foo bar", "author": self.book.author.id}
+        data = {
+            "title": "foo bar",
+            "author": self.book.author.id,
+            "average_rating": 0,
+            "genres": [baker.make(Genre).id],
+        }
         response = authenticated_client.put(
             self.endpoint(self.book.pk),
             json.dumps(data),
