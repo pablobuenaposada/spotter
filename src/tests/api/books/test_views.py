@@ -6,7 +6,7 @@ from django.shortcuts import resolve_url
 from model_bakery import baker
 from rest_framework import status
 
-from api.books.serializers import BookSerializer
+from api.books.serializers import BookInputSerializer, BookOutputSerializer
 from library.models import Author, Book, Genre
 
 
@@ -26,7 +26,7 @@ class TestsBookViewDetail:
         response = client.get(self.endpoint(self.book.pk))
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == BookSerializer(self.book).data
+        assert response.data == BookOutputSerializer(self.book).data
 
 
 @pytest.mark.django_db
@@ -42,7 +42,9 @@ class TestsBookViewList:
         response = client.get(self.endpoint())
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["results"] == [BookSerializer(book).data for book in books]
+        assert response.data["results"] == [
+            BookOutputSerializer(book).data for book in books
+        ]
 
 
 @pytest.mark.django_db
@@ -66,7 +68,7 @@ class TestsBookViewCreate:
         response = authenticated_client.post(self.endpoint(), data)
 
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data == BookSerializer(Book.objects.get()).data
+        assert response.data == BookInputSerializer(Book.objects.get()).data
 
     def test_invalid_data(self, authenticated_client):
         """Wrong payload should return 400 status code"""
@@ -102,7 +104,7 @@ class TestsBookViewUpdate:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == BookSerializer(Book.objects.get()).data
+        assert response.data == BookInputSerializer(Book.objects.get()).data
 
         self.book.refresh_from_db()
         assert self.book.title == data["title"]
@@ -165,39 +167,19 @@ class TestsBookSearchView:
         response = client.get(self.endpoint(), data={"q": "foo"})
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == [
-            {
-                "id": self.book1.id,
-                "title": self.book1.title,
-                "author": {"id": self.book1.author.id, "name": self.book1.author.name},
-            }
-        ]
+        assert response.data == [BookOutputSerializer(self.book1).data]
 
         # match by author
         response = client.get(self.endpoint(), data={"q": "monica"})
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data == [
-            {
-                "id": self.book2.id,
-                "title": self.book2.title,
-                "author": {"id": self.book2.author.id, "name": self.book2.author.name},
-            }
-        ]
+        assert response.data == [BookOutputSerializer(self.book2).data]
 
         # match by title and author
         response = client.get(self.endpoint(), data={"q": "foo monica"})
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == [
-            {
-                "id": self.book1.id,
-                "title": self.book1.title,
-                "author": {"id": self.book1.author.id, "name": self.book1.author.name},
-            },
-            {
-                "id": self.book2.id,
-                "title": self.book2.title,
-                "author": {"id": self.book2.author.id, "name": self.book2.author.name},
-            },
+            BookOutputSerializer(self.book1).data,
+            BookOutputSerializer(self.book2).data,
         ]
