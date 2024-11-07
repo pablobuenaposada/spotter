@@ -1,3 +1,5 @@
+$${\color{red}THIS \space IS \space JUST \space A \space SCAM, \space NOBODY \space IS \space GOING \space TO \space REVIEW \space THIS \space CHALLENGE, \space SO \space IF \space YOU \space ARE \space ASKED \space TO \space DO \space IT, \space BE \space AWARE \space THAT \space SPOTTER.AI \space IS \space FISHY \space}$$
+
 # Job title: Django Developer -- Data Science focus -- remote
 
 ## Library Assessment: 
